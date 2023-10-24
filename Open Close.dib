@@ -63,14 +63,14 @@ public class  InvoicePrinter{
     }
 }
 
-public interface IInvoicePersistance
+public interface IInvoicePersistence
 {
     void Save(Invoice invoice);
 }
 
-public class FilePersistance : IInvoicePersistance{
+public class FilePersistence : IInvoicePersistence{
 
-    public FilePersistance(){}
+    public FilePersistence(){}
 
     public void Save(Invoice invoice){
     string path= @"c:\temp\Invoice.txt";
@@ -87,19 +87,28 @@ public class FilePersistance : IInvoicePersistance{
     }
 }
 
-public class DatabasePersistance : IInvoicePersistance
-{
-    public DatabasePersistance(){}
+public class DatabasePersistence : IInvoicePersistence{
+    public DatabasePersistence(){}
 
     public void Save(Invoice invoice){
         throw new NotImplementedException();
     }
 }
 
+public class PersistenceManager{
+    private readonly FilePersistence File;
+    private readonly DatabasePersistence Database;
+
+    public PersistenceManager(FilePersistence file, DatabasePersistence database){
+        this.File = file;
+        this.Database = database;
+    }
+}
+
 var invoice = new Invoice(new Book("Book xyz", "Me", 12.35), 2, 0,10);
 var printer = new InvoicePrinter(invoice);
-var file = new FilePersistance();
-var db = new DatabasePersistance();
+var file = new FilePersistence();
+var db = new DatabasePersistence();
 invoice.CalculateTotal();
 printer.PrintInvoice();
 file.Save(invoice); 

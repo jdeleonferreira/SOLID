@@ -1,0 +1,85 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!markdown
+
+LISKOV SUBSTITUTION PRINCIPLE
+
+#!csharp
+
+public class Rectangle {
+    protected int Width, Height;
+
+    public Rectangle(){}
+
+    public Rectangle(int width, int height){
+        this.Width = width;
+        this.Height = height;
+    }
+
+    public virtual int GetWidth(){
+        return this.Width;
+    }
+
+    public virtual int GetHeight(){
+        return this.Height;
+    }
+
+    public virtual void SetWidth(int width){
+        this.Width = width;
+    }
+
+    public virtual void SetHeight(int height){
+        this.Height = height;
+    }
+
+    public int GetArea(){
+        return this.Width * this.Height;
+    }
+
+}
+
+public class Square : Rectangle {
+    
+    public Square(){}
+
+    public Square(int size){
+        this.Width = this.Height = size;
+    }
+
+    public override void SetWidth(int width){
+        base.SetWidth(width);
+        base.SetHeight(width); 
+    }
+
+    public override void SetHeight(int height){
+        base.SetHeight(height);
+        base.SetWidth(height);
+    }
+}
+
+public enum Shape{
+    Rectangle,
+    Square
+}
+
+public class Test{
+    public void GetAreaTest(Rectangle r, Shape s ){
+        int width = r.GetWidth();
+        r.SetHeight(10);
+        Console.WriteLine($"Expected area of {Enum.GetName(typeof(Shape),s) } " + (width * 10) + ", got " + r.GetArea());
+    }
+
+    public void DoTest(){
+        Rectangle rc = new Rectangle(2, 3);
+        GetAreaTest(rc, Shape.Rectangle);
+
+        Rectangle sq = new Square();
+        sq.SetWidth(5);
+        GetAreaTest(sq, Shape.Square);
+    }
+}
+
+Test t = new Test();
+t.DoTest();

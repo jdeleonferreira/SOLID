@@ -1,0 +1,45 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!csharp
+
+public interface ParkingLot {
+	void ParkCar();	// Decrease empty spot count by 1
+	void UnparkCar(); // Increase empty spots by 1
+	void GetCapacity();	// Returns car capacity
+}
+
+public interface PaidParkingLot{
+    double CalculateFee(Car car);
+	void DoPayment(Car car);
+}
+
+public interface HourlyFeeParkingLot : PaidParkingLot {}
+
+public interface ConstantParkingLot : PaidParkingLot{}
+
+public interface FreeParkingLot : ParkingLot{}
+
+public class Car {}
+
+public class FreeParking : ParkingLot{
+    public void ParkCar(){
+        throw new NotImplementedException();
+    }
+
+    public void UnparkCar(){
+
+    }
+
+    public void GetCapacity(){
+
+    }	
+	public double CalculateFee(Car car){
+        return 2.0f;
+    } 
+
+    public	void DoPayment(Car car){
+
+    }
+}

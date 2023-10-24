@@ -72,7 +72,7 @@ public class Invoice{
     }
 }
 
-var invoice = new Invoice(new Book {Title = "Book xyz", Author = "Me", Price= 12.35}, 2, 0,10);
+var invoice = new Invoice(new Book("Book xyz", "Me",  12.35), 2, 0,10);
 invoice.CalculateTotal();
 invoice.PrintInvoice();
 invoice.SaveToFile(); 

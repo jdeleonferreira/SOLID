@@ -8,6 +8,10 @@ OPEN FOR EXTENSION AND CLOSED FOR MODIFICATION
 
 #!csharp
 
+using System;
+using System.IO;
+using System.Text;
+
 public class Book {
     public string Author {get; private set;}
     public string Title {get; private set;}
@@ -59,18 +63,20 @@ public class  InvoicePrinter{
     }
 }
 
-public class InvoicePersistance{
-    private Invoice Invoice;
+public interface IInvoicePersistance
+{
+    void Save(Invoice invoice);
+}
 
-    public InvoicePersistance(Invoice inv){
-        this.Invoice = inv;
-    }
+public class FilePersistance : IInvoicePersistance{
 
-    public void SaveToFile(string path= @"c:\temp\Invoice.txt"){
-    
+    public FilePersistance(){}
+
+    public void Save(Invoice invoice){
+    string path= @"c:\temp\Invoice.txt";
         try{
         using(FileStream fs = File.Create(path)){
-            byte[] line = new UTF8Encoding(true).GetBytes($"Book: {this.Invoice.Book.Title}" );
+            byte[] line = new UTF8Encoding(true).GetBytes($"Book: {invoice.Book.Title}" );
             fs.Write(line, 0, line.Length);
             fs.Close();
 
@@ -81,9 +87,20 @@ public class InvoicePersistance{
     }
 }
 
-var invoice = new Invoice(new Book {Title = "Book xyz", Author = "Me", Price= 12.35}, 2, 0,10);
+public class DatabasePersistance : IInvoicePersistance
+{
+    public DatabasePersistance(){}
+
+    public void Save(Invoice invoice){
+        throw new NotImplementedException();
+    }
+}
+
+var invoice = new Invoice(new Book("Book xyz", "Me", 12.35), 2, 0,10);
 var printer = new InvoicePrinter(invoice);
-var store = new InvoicePersistance(invoice);
+var file = new FilePersistance();
+var db = new DatabasePersistance();
 invoice.CalculateTotal();
 printer.PrintInvoice();
-store.SaveToFile(); 
+file.Save(invoice); 
+db.Save(invoice);

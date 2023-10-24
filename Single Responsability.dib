@@ -1,0 +1,152 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"languageName":"csharp","name":"csharp"}]}}
+
+#!csharp
+
+using System;
+using System.IO;
+using System.Text;
+
+// Bien
+public class Book {
+    public string Author {get; private set;}
+    public string Title {get; private set;}
+    public double Price {get; private set;}
+
+    public Book(string author, string title, double price ){
+        this.Author = author;
+        this.Title = title;
+        this.Price  = price; 
+    }
+
+}
+// Single Responsability Principle
+// Una Clase solo deber encargarse de una única responsabilidad y por esto debe tener solo una razón para cambiar.
+
+public class Invoice{
+    private Book Book;
+	private int Quantity;
+	private double DiscountRate;
+	private double TaxRate;
+	private double Total;
+    
+    public Invoice(Book book, int quantity, double discountRate, double taxRate){
+        this.Book = book;
+        this.Quantity = quantity;
+        this.DiscountRate = discountRate;
+        this.TaxRate = taxRate;
+    }
+
+    //Se encarga de hacer los calculos totales de la Factura
+    public double CalculateTotal(){
+        double price = ((this.Book.Price - this.Book.Price * this.DiscountRate) * this.Quantity);
+
+		double priceWithTaxes = price * (1 + this.TaxRate);
+        this.Total = priceWithTaxes;
+		return priceWithTaxes;
+    }
+
+    //Viola el principo de SRP (Sí)
+    //Imprime en pantalla la factura.    
+    public void PrintInvoice(){
+        Console.WriteLine(Quantity + "x " + this.Book.Title + " " + this.Book.Price + "$");
+        Console.WriteLine("Discount Rate: " + this.DiscountRate);
+        Console.WriteLine("Tax Rate: " + this.TaxRate);
+        Console.WriteLine("Total: " + this.Total);
+    }
+
+    //Viola el principio SRP (Sí)
+    // Se encargar de guardar el archivo en formato txt
+    public void SaveToFile(){
+        var path = @"c:\temp\Invoice.txt";
+        try{
+        using(FileStream fs = File.Create(path)){
+            byte[] line = new UTF8Encoding(true).GetBytes($"Book {this.Book.Title}" );
+            fs.Write(line, 0, line.Length);
+            fs.Close();
+        }
+        }catch(Exception ex){
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+
+var invoice = new Invoice(new Book {Title = "Book xyz", Author = "Me", Price= 12.35}, 2, 0,10);
+invoice.CalculateTotal();
+invoice.PrintInvoice();
+invoice.SaveToFile(); 
+
+#!markdown
+
+SOLUCION PROPUESTA
+Crear clases especializadas para la impresión y guaradado de archivos.
+
+#!csharp
+
+public class Invoice{
+    public Book Book {get; private set;}
+	public int Quantity {get; private set;}
+	public double DiscountRate {get; private set;}
+	public double TaxRate{get; private set;}
+	public double Total {get; private set;}
+    
+    public Invoice(Book book, int quantity, double discountRate, double taxRate){
+        this.Book = book;
+        this.Quantity = quantity;
+        this.DiscountRate = discountRate;
+        this.TaxRate = taxRate;
+    }
+
+    //Se encarga de hacer los calculos totales de la Factura
+    public double CalculateTotal(){
+        double price = ((this.Book.Price - this.Book.Price * this.DiscountRate) * this.Quantity);
+
+		double priceWithTaxes = price * (1 + this.TaxRate);
+		return priceWithTaxes;
+    }
+
+}
+
+public class  InvoicePrinter{
+    private Invoice i;
+    public InvoicePrinter(Invoice i){
+        this.i = i;
+    }
+
+    public void PrintInvoice(){
+        Console.WriteLine(this.i.Quantity + "x " + this.i.Book.Title + " " + this.i.Book.Price + "$");
+        Console.WriteLine("Discount Rate: " + this.i.DiscountRate);
+        Console.WriteLine("Tax Rate: " + this.i.TaxRate);
+        Console.WriteLine("Total: " + this.i.Total);
+    }
+}
+
+public class InvoicePersistance{
+    private Invoice Invoice;
+
+    public InvoicePersistance(Invoice inv){
+        this.Invoice = inv;
+    }
+
+    public void SaveToFile(string path= @"c:\temp\Invoice.txt"){
+    
+        try{
+        using(FileStream fs = File.Create(path)){
+            byte[] line = new UTF8Encoding(true).GetBytes($"Book: {this.Invoice.Book.Title}" );
+            fs.Write(line, 0, line.Length);
+            fs.Close();
+
+        }
+        }catch(Exception ex){
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+
+var invoice = new Invoice(new Book {Title = "Book xyz", Author = "Me", Price= 12.35}, 2, 0,10);
+var printer = new InvoicePrinter(invoice);
+var store = new InvoicePersistance(invoice);
+invoice.CalculateTotal();
+printer.PrintInvoice();
+store.SaveToFile(); 
